@@ -73,6 +73,15 @@ Wyniki powinny zawierać, następujące kolumny:
 - `genre` - gatunek zdjęcia oraz 
 - `median_iso` - mediana wartości ISO z ostatnich 5 minut.
 
+```sql
+"""
+@public @buseventtype create json schema
+PhotoEvent(camera string, genre string, iso int, width int, height int, ets string, its string);
+
+@name('result') SELECT genre, median(iso) from PhotoEvent#ext_timed(java.sql.Timestamp.valueOf(ets).getTime(), 300 sec) group by genre;
+""",
+```
+
 ## Zadanie 2
 Wykrywaj zdjęcia o "niestandardowych" wymiarach. Za takowy uznajemy sytuację, gdy:
 - wysokość fotografii stanowi co najwyżej 10% jej szerokości, lub
@@ -80,11 +89,28 @@ Wykrywaj zdjęcia o "niestandardowych" wymiarach. Za takowy uznajemy sytuację, 
 
 Wyniki powinny zawierać wszystkie kolumny.
 
+```sql
+@public @buseventtype create json schema
+PhotoEvent(camera string, genre string, iso int, width int, height int, ets string, its string);
+                        
+@name('result') SELECT width, height from PhotoEvent where (height < 0.1 * width or width <= 0.1 * height);
+```
+
+
+
 ## Zadanie 3
 Wykrywaj zdjęcia, dla których wartość ISO mocno różni się od mediany dla danego gatunku (tematu) zdjęcia z ostatnich 5 minut,
 tzn. jest co najmniej 2 razy większa lub mniejsza od mediany.
 
 Wyniki powinny zawierać wszystkie kolumny.
+
+```sql
+@public @buseventtype create json schema
+PhotoEvent(camera string, genre string, iso int, width int, height int, ets string, its string);
+                        
+@name('result') SELECT * from PhotoEvent#ext_timed(java.sql.Timestamp.valueOf(ets).getTime(), 300 sec) group by genre having (iso > 2*median(iso) or iso < 0.5*median(iso));
+                    
+```
 
 ## Zadanie 4
 Porównaj ze sobą średnią wartość ISO między 5 ostatnio zarejestrowanymi zdjęciami dla tematyki weselnej oraz beauty.

@@ -43,7 +43,7 @@ public class EsperClient {
                         @public @buseventtype create json schema
                         PhotoEvent(camera string, genre string, iso int, width int, height int, ets string, its string);
                         
-                        @name('result') SELECT * from PhotoEvent;
+                        @name('result') SELECT width, height from PhotoEvent where (height < 0.1 * width or width <= 0.1 * height);
                     """,
                     compilerArgs
             );
